@@ -6,9 +6,12 @@ public enum Player
 
 public enum GameResult
 {
-    PlayerWon,
-    GreedWon,
-    Tie
+    PlayerWon_BetterCards,
+    PlayerWon_GreedBurn,
+    GreedWon_BetterCards,
+    GreedWon_PlayerBurn,
+    Tie,
+    Tie_TargetScore
 }
 
 public enum TurnPlay

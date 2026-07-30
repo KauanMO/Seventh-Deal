@@ -1,8 +1,12 @@
 using UnityEngine;
 using TMPro;
+using Yarn.Unity;
 
 public class BlackJackManager : MonoBehaviour
 {
+    [SerializeField]
+    private DialogueRunner dialogueRunner;
+
     [SerializeField]
     private GameObject cardPrefab;
 
@@ -28,9 +32,6 @@ public class BlackJackManager : MonoBehaviour
     private TMP_Text playerBurnText;
 
     [SerializeField]
-    private TMP_Text gameResultText;
-
-    [SerializeField]
     private TMP_Text targetScoreText;
 
     [SerializeField]
@@ -40,7 +41,7 @@ public class BlackJackManager : MonoBehaviour
     private PlayerOptionsUI playerOptionsUI;
 
     [SerializeField]
-    private int seed;
+    private readonly int seed;
 
     [SerializeField]
     private int maxBurn;
@@ -51,52 +52,28 @@ public class BlackJackManager : MonoBehaviour
     [SerializeField]
     private int matchRoundsCount;
 
-    private MatchManager matchManager;
-
-    private GameObject newRoundButton;
-
     private void Start()
     {
-        matchManager = new(matchRoundsCount, matchPointsText);
+        DialogueManager dialogueManager = new(dialogueRunner);
 
-        StartNewRound();
-    }
+        MatchManager matchManager = new(matchRoundsCount,
+            matchPointsText,
+            cardPrefab,
+            matchRoundsCount,
+            targetScore,
+            maxBurn,
+            seed,
+            playerOptionsUI,
+            targetScoreText,
+            playerBurnText,
+            greedScoreText,
+            newRoundButtonPrefab,
+            playerArea,
+            greedArea,
+            newRoundButtonArea,
+            playerScoreText,
+            dialogueManager);
 
-    private void StartNewRound()
-    {
-        if (newRoundButton != null) Object.Destroy(newRoundButton);
-        if (matchManager.HasMatchWinner()) return;
-
-        RandomHelper random = new(seed);
-
-        RoundManager currentRound = new(
-                cardPrefab,
-                playerArea,
-                greedArea,
-                playerScoreText,
-                greedScoreText,
-                playerBurnText,
-                gameResultText,
-                targetScoreText,
-                random,
-                maxBurn,
-                targetScore);
-
-        currentRound.OnRoundEnded += HandleRoundEnd;
-
-        currentRound.StartRound();
-
-        playerOptionsUI.Setup(currentRound);
-    }
-
-    private void HandleRoundEnd(GameResult result)
-    {
-        matchManager.RegisterRoundWinner(result);
-
-        if (matchManager.HasMatchWinner()) return;
-
-        newRoundButton = GameObject.Instantiate(newRoundButtonPrefab, newRoundButtonArea, false);
-
-        newRoundButton.GetComponent<NewRoundOnClick>().OnNewRoundRequest += StartNewRound;
+        dialogueManager.TriggerDialogue("GreedIntro", next: () => matchManager.StartMatch());
     }
 }

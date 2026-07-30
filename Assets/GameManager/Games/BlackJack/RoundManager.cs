@@ -7,21 +7,15 @@ public class RoundManager
     private readonly CommonDeck deck;
     private readonly JackBlackPlayer player;
     private readonly JackBlackPlayer greed;
-
     private readonly GameObject cardPrefab;
-
     private readonly Transform playerArea;
     private readonly Transform greedArea;
-
-    private readonly TMP_Text gameResultText;
-
     private readonly int maxBurn;
     private readonly int targetScore;
-
-    private bool gameIsOn = true;
-
+    public bool gameIsOn = false;
     private readonly GreedAI greedAI;
-
+    private readonly RandomHelper random;
+    private DialogueManager dialogueManager;
     public event Action<GameResult> OnRoundEnded;
 
     public RoundManager(GameObject cardPrefab,
@@ -30,13 +24,12 @@ public class RoundManager
         TMP_Text playerScore,
         TMP_Text greedScore,
         TMP_Text playerBurn,
-        TMP_Text gameResultText,
         TMP_Text targetScoreText,
         RandomHelper random,
+        DialogueManager dialogueManager,
         int maxBurn,
         int targetScore)
     {
-
         player = new JackBlackPlayer(Player.Player, new(playerScore, playerBurn));
         greed = new JackBlackPlayer(Player.Greed, new(greedScore));
         deck = new CommonDeck();
@@ -45,15 +38,15 @@ public class RoundManager
         this.playerArea = playerArea;
         this.greedArea = greedArea;
 
-        this.gameResultText = gameResultText;
-
         this.maxBurn = maxBurn;
         this.targetScore = targetScore;
         targetScoreText.SetText(targetScore.ToString());
 
-        greedAI = new(random);
+        this.dialogueManager = dialogueManager;
 
-        gameResultText.SetText("");
+        greedAI = new(random);
+        this.random = random;
+
         CleanTable();
     }
 
@@ -63,6 +56,8 @@ public class RoundManager
 
         DrawInitialCards();
         ShowCards();
+
+        gameIsOn = true;
     }
 
     public void Play(TurnPlay turnPlay)
@@ -141,7 +136,7 @@ public class RoundManager
     {
         GameResult result = GetResult();
 
-        EndGame(result);
+        EndRound(result);
     }
 
     private void DrawInitialCards()
@@ -220,21 +215,24 @@ public class RoundManager
 
     private void CheckBurn()
     {
-        if (player.burn >= maxBurn) EndGame(GameResult.GreedWon);
+        if (player.burn >= maxBurn) EndRound(GameResult.GreedWon_PlayerBurn);
     }
 
     private GameResult GetResult()
     {
-        if (player.score.Equals(greed.score)) return GameResult.Tie;
+        if (player.score.Equals(greed.score))
+        {
+            return player.score.Equals(targetScore) ? GameResult.Tie_TargetScore : GameResult.Tie;
+        }
 
-        if (greed.score > targetScore) return GameResult.PlayerWon;
+        if (greed.score > targetScore) return GameResult.PlayerWon_BetterCards;
 
-        if (targetScore - player.score > targetScore - greed.score || player.score > targetScore) return GameResult.GreedWon;
+        if (targetScore - player.score > targetScore - greed.score || player.score > targetScore) return GameResult.GreedWon_BetterCards;
 
-        return GameResult.PlayerWon;
+        return GameResult.PlayerWon_BetterCards;
     }
 
-    private void EndGame(GameResult result)
+    private void EndRound(GameResult result)
     {
         if (!gameIsOn) return;
 
@@ -242,15 +240,29 @@ public class RoundManager
 
         gameIsOn = false;
 
-        gameResultText.SetText(result switch
-        {
-            GameResult.GreedWon => "You lose",
-            GameResult.PlayerWon => "You won",
-            GameResult.Tie => "Tie",
-            _ => "error"
-        });
+        string dialogueName = "";
 
-        OnRoundEnded.Invoke(result);
+        switch (result)
+        {
+            case GameResult.GreedWon_BetterCards:
+                dialogueName = "GreedRoundWonReaction" + random.Range(1, 4);
+                break;
+            case GameResult.GreedWon_PlayerBurn:
+                dialogueName = "GreedPlayerBurnLostReaction" + random.Range(1, 4);
+                break;
+            case GameResult.PlayerWon_BetterCards:
+                dialogueName = "GreedRoundLostReaction" + random.Range(1, 4);
+                break;
+            case GameResult.PlayerWon_GreedBurn:
+                dialogueName = "GreedBurnLostReaction" + random.Range(1, 4);
+                break;
+                // CRIAR DIALOGO PRA TIE E PRA TIE EM TARGETSCORE
+            case GameResult.Tie_TargetScore:
+                dialogueName = "GreedBurnLostReaction" + random.Range(1, 4);
+                break;
+        }
+
+        dialogueManager.TriggerDialogue(dialogueName, null, () => OnRoundEnded.Invoke(result));
     }
 
     private void TurnCardsFaceUp()

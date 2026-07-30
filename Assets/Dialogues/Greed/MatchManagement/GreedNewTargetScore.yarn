@@ -1,0 +1,8 @@
+title: GreedNewTargetScore
+
+---
+<<declare $targetScore = 21>>
+
+Greed: Too little cards on that table
+Greed: $targetScore is the new target...
+===

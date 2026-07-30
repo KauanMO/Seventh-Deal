@@ -1,0 +1,23 @@
+title: GreedExplanation
+
+---
+Greed: At the start of every round, both of us will buy two cards.
+Greed: The difference is that I will buy one faced down card.
+Greed: Every round you will have 2 options: Buy or Stand.
+Greed: If you decide to buy a card, you can decide if it will be positive...
+Greed: Or negative for your score.
+Greed: If you decide to buy a negative one, you will receive the value of the card in burn.
+Greed: The table will display the max burn you can take.
+Greed: Remember: If you reach the maximum, you lose.
+Greed: I will always play after you, with the same options.
+Greed: Every card will count negativily or positivily for your score.
+Greed: Jacks, Queens and Kings values 10 to your score.
+Greed: Aces values 11, but if you exceed the target, it will value 1.
+Greed: But for burn value. It <shake>ALWAYS</shake> values 11.
+Greed: Wins the one who come closer to the target score.
+Greed: The table will always display that too.
+Greed: You good? or want me to repeat that?
+-> I'm good.
+-> Repeat it, please.
+    <<jump GreedExplanation>>
+===

@@ -11,11 +11,11 @@ public class PlayerOptionsUI : MonoBehaviour
 
     public void PlayerPlay(TurnPlay play)
     {
-        round.Play(play);
+        if (round.gameIsOn) round.Play(play);
     }
 
     public void StandPlay()
     {
-        PlayerPlay(TurnPlay.Stand);
+        if (round.gameIsOn) PlayerPlay(TurnPlay.Stand);
     }
 }

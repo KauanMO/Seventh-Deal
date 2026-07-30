@@ -1,0 +1,17 @@
+﻿title: GreedIntro
+position: -187,-254
+color: green
+
+---
+Greed: Welcome to my table.
+Greed: Here every card has a unimaginable value.
+Greed: Sit down.
+-> Sit
+	Greed: Excellent.
+	Greed: We will play a Jackblack game variant. Do you need any explanation?
+	-> Yes, please.
+		<<jump GreedExplanation>>
+	-> No, I'm good.
+-> Leave
+	Greed: Coward.
+===
